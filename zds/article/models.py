@@ -30,6 +30,7 @@ from zds.utils import slugify
 from zds.utils.articles import export_article, get_blob
 from zds.utils.models import SubCategory, Comment, Licence
 from django.core.urlresolvers import reverse
+from zds.stats.models import Log, Logable
 
 
 def image_path(instance, filename):
@@ -39,7 +40,7 @@ def image_path(instance, filename):
     return os.path.join('articles', str(instance.pk), filename)
 
 
-class Article(models.Model):
+class Article(models.Model, Logable):
 
     class Meta:
         verbose_name = 'Article'

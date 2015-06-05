@@ -2,6 +2,7 @@
 
 from math import ceil
 import shutil
+from abc import ABCMeta
 try:
     import ujson as json_reader
 except ImportError:
@@ -26,6 +27,7 @@ from zds.utils import slugify, get_current_user
 from zds.utils.models import SubCategory, Licence, Comment, HelpWriting
 from zds.utils.tutorials import get_blob, export_tutorial
 from zds.tutorial.managers import TutorialManager
+from zds.stats.models import Log, Logable
 
 
 TYPE_CHOICES = (
@@ -40,8 +42,7 @@ STATUS_CHOICES = (
     ('REJECT', 'Rejeté'),
 )
 
-
-class Tutorial(models.Model):
+class Tutorial(models.Model, Logable):
 
     """A tutorial, large or small."""
     class Meta:
@@ -542,7 +543,7 @@ def mark_read(tutorial):
         a.save()
 
 
-class Part(models.Model):
+class Part(models.Model, Logable):
 
     """A part, containing chapters."""
     class Meta:
@@ -694,7 +695,7 @@ class Part(models.Model):
             chapter.update_children()
 
 
-class Chapter(models.Model):
+class Chapter(models.Model, Logable):
 
     """A chapter, containing text."""
     class Meta:
