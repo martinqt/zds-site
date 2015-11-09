@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from rest_framework import status, exceptions, filters
+from django.http import Http404
 from rest_framework.generics import RetrieveAPIView, DestroyAPIView, ListCreateAPIView, \
     get_object_or_404, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -10,10 +11,10 @@ from rest_framework_extensions.etag.decorators import etag
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.constructors import DefaultKeyConstructor
 
-from zds.stats.models import Log
+from zds.stats.models import Log, Source, Device , OS, Browser, City, Country
 from zds.tutorial.models import Tutorial, Chapter, Part
 from zds.article.models import Article
-from zds.stats.api.serializers import StatTutorialSerializer, StatPartSerializer, StatChapterSerializer, StatArticleSerializer, StatSourceContentSerializer
+from zds.stats.api.serializers import StatTutorialSerializer, StatPartSerializer, StatChapterSerializer, StatArticleSerializer, StatSourceContentSerializer, StatDeviceContentSerializer, StatBrowserContentSerializer, StatCountryContentSerializer, StatCityContentSerializer, StatOSContentSerializer
 
 class PagingStatContentListKeyConstructor(DefaultKeyConstructor):
     pagination = bits.PaginationKeyBit()
@@ -51,6 +52,7 @@ class StatContentListAPI(ListCreateAPIView):
 
     def get_queryset(self):
         if self.kwargs.get("content_type") == 'tutoriel':
+            print("------------> OK")
             return Tutorial.objects.all().filter(sha_public__isnull=False)
         elif self.kwargs.get("content_type") == 'partie':
             return Part.objects.all().filter(tutorial__sha_public__isnull=False)
@@ -85,16 +87,16 @@ class StatContentDetailAPI(RetrieveAPIView):
             raise exceptions.NotFound()
 
 def get_app_from_content_type(content_type):
-	if content_type=="tutoriel":
-		return "tutorial"
-	elif content_type=="article":
-		return "article"
-	elif content_type=="chapitre":
-		return "chapter"
-	elif content_type=="partie":
-		return "part"
-	else:
-		return None
+    if content_type=="tutoriel":
+        return "tutorial"
+    elif content_type=="article":
+        return "article"
+    elif content_type=="chapitre":
+        return "chapter"
+    elif content_type=="partie":
+        return "part"
+    else:
+        return None
 
 class StatSourceContentListAPI(ListCreateAPIView):
     filter_backends = (filters.OrderingFilter, filters.OrderingFilter)
@@ -105,28 +107,131 @@ class StatSourceContentListAPI(ListCreateAPIView):
             return StatSourceContentSerializer
 
     def get_queryset(self):
-    	app_name = get_app_from_content_type(self.kwargs.get("content_type"))
-        return Log.objects.all().filter(content_type=app_name).distinct()
+        content_type = self.kwargs.get("content_type")
+        app_name = get_app_from_content_type(content_type)
+        app_id = self.kwargs.get("content_id")
 
-class StatSourceContentDetailAPI(RetrieveAPIView):
-    obj_key_func = DetailKeyConstructor()
+        if app_name is not None and app_id is not None:
+            type_logs = Log.objects.filter(content_type=app_name, id_zds=app_id).values_list('dns_referal', flat=True)
+            return Source.objects.all().filter(code__in=type_logs)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+        if app_name is not None:
+            type_logs = Log.objects.filter(content_type=app_name).values_list('dns_referal', flat=True)
+            return Source.objects.all().filter(code__in=type_logs)
+
+        raise exceptions.NotFound()
+
+class StatDeviceContentListAPI(ListCreateAPIView):
+    filter_backends = (filters.OrderingFilter, filters.OrderingFilter)
+    list_key_func = PagingStatContentListKeyConstructor()
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return StatSourceContentSerializer
+            return StatDeviceContentSerializer
 
-    def get_object(self):
+    def get_queryset(self):
+        content_type = self.kwargs.get("content_type")
+        app_name = get_app_from_content_type(content_type)
+        app_id = self.kwargs.get("content_id")
 
-        if self.kwargs.get("content_type") == 'tutoriel':
-            return Tutorial.objects.all().filter(id=self.kwargs.get("content_id"), sha_public__isnull=False).first()
-        elif self.kwargs.get("content_type") == 'partie':
-            return Part.objects.all().filter(id=self.kwargs.get("content_id"), tutorial__sha_public__isnull=False).first()
-        elif self.kwargs.get("content_type") == 'chapitre':
-            return Chapter.objects.all().filter(id=self.kwargs.get("content_id"), part__tutorial__sha_public__isnull=False).first()
-        elif self.kwargs.get("content_type") == 'article':
-            return Article.objects.all().filter(id=self.kwargs.get("content_id"), sha_public__isnull=False).first()
-        else:
-            raise exceptions.NotFound()
+        if app_name is not None and app_id is not None:
+            type_logs = Log.objects.filter(content_type=app_name, id_zds=app_id).values_list('device_family', flat=True).distinct()
+            return Device.objects.all().filter(code__in=type_logs)
+
+        if app_name is not None:
+            type_logs = Log.objects.filter(content_type=app_name).values_list('device_family', flat=True).distinct()
+            return Device.objects.all().filter(code__in=type_logs)
+
+        raise exceptions.NotFound()
+
+class StatBrowserContentListAPI(ListCreateAPIView):
+    filter_backends = (filters.OrderingFilter, filters.OrderingFilter)
+    list_key_func = PagingStatContentListKeyConstructor()
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return StatBrowserContentSerializer
+
+    def get_queryset(self):
+        content_type = self.kwargs.get("content_type")
+        app_name = get_app_from_content_type(content_type)
+        app_id = self.kwargs.get("content_id")
+
+        if app_name is not None and app_id is not None:
+            type_logs = Log.objects.filter(content_type=app_name, id_zds=app_id).values_list('browser_family', flat=True).distinct()
+            return Browser.objects.all().filter(code__in=type_logs)
+
+        if app_name is not None:
+            type_logs = Log.objects.filter(content_type=app_name).values_list('browser_family', flat=True).distinct()
+            return Browser.objects.all().filter(code__in=type_logs)
+
+        raise exceptions.NotFound()
+
+class StatCountryContentListAPI(ListCreateAPIView):
+    filter_backends = (filters.OrderingFilter, filters.OrderingFilter)
+    list_key_func = PagingStatContentListKeyConstructor()
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return StatCountryContentSerializer
+
+    def get_queryset(self):
+        content_type = self.kwargs.get("content_type")
+        app_name = get_app_from_content_type(content_type)
+        app_id = self.kwargs.get("content_id")
+
+        if app_name is not None and app_id is not None:
+            type_logs = Log.objects.filter(content_type=app_name, id_zds=app_id).values_list('country', flat=True).distinct()
+            return Country.objects.all().filter(code__in=type_logs)
+
+        if app_name is not None:
+            type_logs = Log.objects.filter(content_type=app_name).values_list('country', flat=True).distinct()
+            return Country.objects.all().filter(code__in=type_logs)
+
+        raise exceptions.NotFound()
+
+class StatCityContentListAPI(ListCreateAPIView):
+    filter_backends = (filters.OrderingFilter, filters.OrderingFilter)
+    list_key_func = PagingStatContentListKeyConstructor()
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return StatCityContentSerializer
+
+    def get_queryset(self):
+        content_type = self.kwargs.get("content_type")
+        app_name = get_app_from_content_type(content_type)
+        app_id = self.kwargs.get("content_id")
+
+        if app_name is not None and app_id is not None:
+            type_logs = Log.objects.filter(content_type=app_name, id_zds=app_id).values_list('city', flat=True).distinct()
+            return City.objects.all().filter(code__in=type_logs)
+
+        if app_name is not None:
+            type_logs = Log.objects.filter(content_type=app_name).values_list('city', flat=True).distinct()
+            return City.objects.all().filter(code__in=type_logs)
+
+        raise exceptions.NotFound()
+
+class StatOSContentListAPI(ListCreateAPIView):
+    filter_backends = (filters.OrderingFilter, filters.OrderingFilter)
+    list_key_func = PagingStatContentListKeyConstructor()
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return StatOSContentSerializer
+
+    def get_queryset(self):
+        content_type = self.kwargs.get("content_type")
+        app_name = get_app_from_content_type(content_type)
+        app_id = self.kwargs.get("content_id")
+
+        if app_name is not None and app_id is not None:
+            type_logs = Log.objects.filter(content_type=app_name, id_zds=app_id).values_list('os_family', flat=True).distinct()
+            return OS.objects.all().filter(code__in=type_logs)
+
+        if app_name is not None:
+            type_logs = Log.objects.filter(content_type=app_name).values_list('os_family', flat=True).distinct()
+            return OS.objects.all().filter(code__in=type_logs)
+
+        raise exceptions.NotFound()

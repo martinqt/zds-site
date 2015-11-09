@@ -5,12 +5,13 @@ import os
 import re
 from datetime import datetime
 from user_agents import parse
+from django.db import transaction
 import pygeoip
 from django.conf import settings
 from urlparse import urlparse
 from hashlib import md5
 from zds.tutorial.models import Tutorial
-from zds.stats.models import Log
+from zds.stats.models import Log, Source, Device, Browser, Country, City, OS
 
 class ContentParsing(object):
     recognize_patterns = []
@@ -91,7 +92,26 @@ class Command(BaseCommand):
 
         return False
 
+    def flush_denormalize(self, class_name, field_in_class, field_in_log, list_of_datas):
+        module = "zds.stats.models"
+        obj = __import__(module, globals(), locals(), [class_name])
+        cls = getattr(obj, class_name)
+        data_existants = cls.objects.values_list(field_in_class, flat=True)
+        data_for_save = list(set(list_of_datas)-set(data_existants))
+
+        for my_data in data_for_save:
+            create_arg = {field_in_class: my_data}
+            cls.objects.create(**create_arg)
+
+
+    @transaction.atomic
     def flush_data_in_database(self):
+        my_sources = []
+        my_os = []
+        my_browsers = []
+        my_devices = []
+        my_cities = []
+        my_countries = []
         for data in self.datas:
             existant = Log.objects.filter(hash_code=data["hash"], timestamp=data["timestamp"]).first()
             if existant is None:
@@ -126,6 +146,20 @@ class Command(BaseCommand):
                 existant.city=data["city"]
 
             existant.save()
+            my_sources.append(data["dns_referal"])
+            my_os.append(data["os_family"])
+            my_cities.append(data["city"])
+            my_countries.append(data["country"])
+            my_devices.append(data["device_family"])
+            my_browsers.append(data["browser_family"])
+
+        self.flush_denormalize("Source", "code", "dns_referal", my_sources)
+        self.flush_denormalize("OS", "code", "os_family", my_os)
+        self.flush_denormalize("Device", "code", "device_family", my_devices)
+        self.flush_denormalize("Country", "code", "country", my_countries)
+        self.flush_denormalize("City", "code", "city", my_cities)
+        self.flush_denormalize("Browser", "code", "browser_family", my_browsers)
+
 
     def handle(self, *args, **options):
         if len(args) != 1:
@@ -194,6 +228,7 @@ class Command(BaseCommand):
 
 
         for line in source:
+            print(line)
             match = pattern_log.match(line)
             if match is not None:
                 res = {}

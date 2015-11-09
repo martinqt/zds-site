@@ -10,7 +10,7 @@ from django.conf import settings
 from urlparse import urlparse
 from hashlib import md5
 from zds.tutorial.models import Tutorial
-from zds.stats.factories import LogFactory
+from zds.stats.factories import LogRandomFactory
 
 class Command(BaseCommand):
     args = 'path=<path_to_file> lines=<number_of_log_lines>'
@@ -36,6 +36,6 @@ class Command(BaseCommand):
         source = open(path_generate, "w")
 
         for x in range(0, nb_lines):
-            factory = LogFactory()
+            factory = LogRandomFactory()
             source.write("{}\n".format(factory))
         source.close()

@@ -118,6 +118,11 @@ class Tutorial(models.Model, Logable):
 
     objects = TutorialManager()
 
+    def __init__(self, *args, **kwargs):
+        self.code_name = "id_zds"
+        super(Tutorial, self).__init__(*args, **kwargs)
+        self.code_value = self.pk
+
     def __unicode__(self):
         return self.title
 
@@ -550,6 +555,11 @@ class Part(models.Model, Logable):
         verbose_name = 'Partie'
         verbose_name_plural = 'Parties'
 
+    def __init__(self, *args, **kwargs):
+        self.code_name = "id_zds"
+        super(Part, self).__init__(*args, **kwargs)
+        self.code_value = self.pk
+
     # A part has to belong to a tutorial, since only tutorials with parts
     # are large tutorials
     tutorial = models.ForeignKey(Tutorial, verbose_name='Tutoriel parent', db_index=True)
@@ -738,6 +748,11 @@ class Chapter(models.Model, Logable):
         blank=True,
         null=True,
         max_length=200)
+
+    def __init__(self, *args, **kwargs):
+        self.code_name = "id_zds"
+        super(Chapter, self).__init__(*args, **kwargs)
+        self.code_value = self.pk
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -971,6 +986,11 @@ class Extract(models.Model):
         blank=True,
         null=True,
         max_length=200)
+
+    def __init__(self, *args, **kwargs):
+        self.code_name = "id_zds"
+        super(Extract, self).__init__(*args, **kwargs)
+        self.code_value = self.pk
 
     def __unicode__(self):
         return u'<extrait \'{0}\'>'.format(self.title)

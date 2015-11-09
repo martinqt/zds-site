@@ -2,20 +2,21 @@
 
 from django.conf.urls import patterns, url
 
-from zds.stats.api.views import StatContentListAPI, StatContentDetailAPI, StatSourceContentListAPI, StatSourceContentDetailAPI
+from zds.stats.api.views import StatContentListAPI, StatContentDetailAPI, StatSourceContentListAPI, StatDeviceContentListAPI, StatBrowserContentListAPI, StatCountryContentListAPI, StatCityContentListAPI, StatOSContentListAPI
 
 urlpatterns = patterns('',
                         url(r'^(?P<content_type>.+)/(?P<content_id>[0-9]+)/visites/$', StatContentDetailAPI.as_view(), name='api-stats-details-content-visits'),
                         url(r'^(?P<content_type>.+)/visites/$', StatContentListAPI.as_view(), name='api-stats-list-content-visits'),
-                        url(r'^(?P<content_type>.+)/(?P<content_id>[0-9]+)/visites/sources/$', StatSourceContentDetailAPI.as_view(), name='api-stats-details-source-content-visits'),
+                        url(r'^(?P<content_type>.+)/(?P<content_id>[0-9]+)/visites/sources/$', StatSourceContentListAPI.as_view(), name='api-stats-details-source-content-visits'),
                         url(r'^(?P<content_type>.+)/visites/sources/$', StatSourceContentListAPI.as_view(), name='api-stats-list-source-content-visits'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/plateformes$', StatContentDetailAPI.as_view(), name='api-member-profile'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/geo$', StatContentDetailAPI.as_view(), name='api-member-profile'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/geo/continents$', StatContentDetailAPI.as_view(), name='api-member-profile'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/geo/continents/pays$', StatContentDetailAPI.as_view(), name='api-member-profile'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/geo/continents/pays/villes$', StatContentDetailAPI.as_view(), name='api-member-profile'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/geo/pays$', StatContentDetailAPI.as_view(), name='api-member-profile'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/geo/pays/villes$', StatContentDetailAPI.as_view(), name='api-member-profile'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/geo/villes$', StatContentDetailAPI.as_view(), name='api-member-profile'),
-                        #url(r'^contenus/(?P<content_type>.+)/(?P<content_id>[0-9]+)/stats/visites/geo/continents$', StatContentDetailAPI.as_view(), name='api-member-profile'),
+                        url(r'^(?P<content_type>.+)/(?P<content_id>[0-9]+)/visites/appareil/$', StatDeviceContentListAPI.as_view(), name='api-stats-details-device-content-visits'),
+                        url(r'^(?P<content_type>.+)/visites/appareil/$', StatDeviceContentListAPI.as_view(), name='api-stats-list-device-content-visits'),
+                        url(r'^(?P<content_type>.+)/(?P<content_id>[0-9]+)/visites/navigateur/$', StatBrowserContentListAPI.as_view(), name='api-stats-details-browser-content-visits'),
+                        url(r'^(?P<content_type>.+)/visites/navigateur/$', StatBrowserContentListAPI.as_view(), name='api-stats-list-browser-content-visits'),
+                        url(r'^(?P<content_type>.+)/(?P<content_id>[0-9]+)/visites/pays/$', StatCountryContentListAPI.as_view(), name='api-stats-details-country-content-visits'),
+                        url(r'^(?P<content_type>.+)/visites/pays/$', StatCountryContentListAPI.as_view(), name='api-stats-list-country-content-visits'),
+                        url(r'^(?P<content_type>.+)/(?P<content_id>[0-9]+)/visites/ville/$', StatCityContentListAPI.as_view(), name='api-stats-details-city-content-visits'),
+                        url(r'^(?P<content_type>.+)/visites/ville/$', StatCityContentListAPI.as_view(), name='api-stats-list-city-content-visits'),
+                        url(r'^(?P<content_type>.+)/(?P<content_id>[0-9]+)/visites/systeme/$', StatOSContentListAPI.as_view(), name='api-stats-details-os-content-visits'),
+                        url(r'^(?P<content_type>.+)/visites/systeme/$', StatOSContentListAPI.as_view(), name='api-stats-list-os-content-visits'),
 )

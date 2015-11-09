@@ -94,6 +94,11 @@ class Article(models.Model, Logable):
 
     objects = ArticleManager()
 
+    def __init__(self, *args, **kwargs):
+        self.code_name = "id_zds"
+        super(Article, self).__init__(*args, **kwargs)
+        self.code_value = self.pk
+
     def __unicode__(self):
         return self.title
 
