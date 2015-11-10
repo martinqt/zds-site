@@ -22,12 +22,13 @@ class ContentParsing(object):
         for rg in regxps:
             self.recognize_patterns.append({
                 "pattern": re.compile(rg["regxp"]),
+                "regxp": rg["regxp"],
                 "unique_group": rg["unique_group"],
                 "mapped_app": rg["mapped_app"],
                 "mapped_class": rg["mapped_class"],
                 "mapped_column": rg["mapped_column"],
                 })
-            self.type_content = rg["mapped_app"]
+            self.type_content = rg["mapped_class"].lower()
 
     def add_regexp(self, regxp):
         self.recognize_patterns.append({
@@ -193,28 +194,28 @@ class Command(BaseCommand):
         
 
         reg_chapter= [{
-            "regxp": "^\/tutoriels\/(?P<id_tuto>\d+)\/(?P<label_tuto>\S+)\/(?P<id_part>\d+)\/(?P<label_part>\S+)\/(?P<id_chapter>\d+)\/(?P<label_chapter>\S+)\/",
+            "regxp": "^\/tutoriels\/(?P<id_tuto>\d+)\/(?P<label_tuto>[\S][^\/]+)\/(?P<id_part>\d+)\/(?P<label_part>[\S][^\/]+)\/(?P<id_chapter>\d+)\/(?P<label_chapter>[\S][^\/]+)\/",
             "unique_group": "id_chapter",
             "mapped_app": "tutorial",
             "mapped_class": "Chapter",
             "mapped_column": "pk",
             }]
         reg_part= [{
-            "regxp": "^\/tutoriels\/(?P<id_tuto>\d+)\/(?P<label_tuto>\S+)\/(?P<id_part>\d+)\/(?P<label_part>\S+)\/",
+            "regxp": "^\/tutoriels\/(?P<id_tuto>\d+)\/(?P<label_tuto>[\S][^\/]+)\/(?P<id_part>\d+)\/(?P<label_part>[\S][^\/]+)",
             "unique_group": "id_part",
             "mapped_app": "tutorial",
             "mapped_class": "Part",
             "mapped_column": "pk",
             }]
         reg_tuto= [{
-            "regxp": "^\/tutoriels\/(?P<id_tuto>\d+)\/(?P<label_tuto>\S+)\/",
+            "regxp": "^\/tutoriels\/(?P<id_tuto>\d+)\/(?P<label_tuto>[\S][^\/]+)\/",
             "unique_group": "id_tuto",
             "mapped_app": "tutorial",
             "mapped_class": "Tutorial",
             "mapped_column": "pk",
             }]
         reg_article= [{
-            "regxp": "^\/articles\/(?P<id_article>\d+)\/(?P<label_article>\S+)\/",
+            "regxp": "^\/articles\/(?P<id_article>\d+)\/(?P<label_article>[\S][^\/]+)\/",
             "unique_group": "id_article",
             "mapped_app": "article",
             "mapped_class": "Article",
@@ -228,7 +229,6 @@ class Command(BaseCommand):
 
 
         for line in source:
-            print(line)
             match = pattern_log.match(line)
             if match is not None:
                 res = {}
@@ -265,3 +265,4 @@ class Command(BaseCommand):
         print("---> total : {}".format(len(self.datas)))
         source.close()
         self.flush_data_in_database()
+        

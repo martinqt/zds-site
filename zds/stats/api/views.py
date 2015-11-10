@@ -52,7 +52,6 @@ class StatContentListAPI(ListCreateAPIView):
 
     def get_queryset(self):
         if self.kwargs.get("content_type") == 'tutoriel':
-            print("------------> OK")
             return Tutorial.objects.all().filter(sha_public__isnull=False)
         elif self.kwargs.get("content_type") == 'partie':
             return Part.objects.all().filter(tutorial__sha_public__isnull=False)

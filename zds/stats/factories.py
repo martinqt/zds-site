@@ -39,8 +39,8 @@ class LogRandomFactory():
         self.http_referer = fake.random_element(elements=('/', fake.uri()))
         self.http_user_agent = fake.user_agent()
         self.http_x_forwarded_for = "-"
-        self.request_time = fake.pydecimal(left_digits=None, right_digits=None, positive=True)
-        self.upstream_response_time = fake.pydecimal(left_digits=None, right_digits=None, positive=True)
+        self.request_time = fake.pyint()
+        self.upstream_response_time = fake.pyint()
         self.pipe = fake.random_element(elements=('.', 'P'))
 
     def __str__(self):
@@ -71,19 +71,19 @@ class LogFactory():
     upstream_response_time = ""
     pipe = ""
 
-    def __init__(self, content=None):
+    def __init__(self, pk, content=None):
         fake = Factory.create(locale="fr_FR")
         self.remote_addr = fake.random_element(elements=(fake.ipv4(), fake.ipv6()))
         self.remote_user = fake.user_name()
         self.time_local = "{}:{} {}".format(fake.date(pattern="%d/%b/%Y"), fake.time(pattern="%H:%M:%S"), fake.timezone())
         if content == "article":
-            fake_content = Article.objects.filter(sha_public__isnull=False).order_by('?').first()
+            fake_content = Article.objects.filter(pk=pk).first()
         elif content == "tutorial":
-            fake_content = Tutorial.objects.filter(sha_public__isnull=False).order_by('?').first()
+            fake_content = Tutorial.objects.filter(pk=pk).first()
         elif content == "part":
-            fake_content = Part.objects.filter(tutorial__sha_public__isnull=False).order_by('?').first()
+            fake_content = Part.objects.filter(pk=pk).first()
         elif content == "chapter":
-            fake_content = Chapter.objects.filter(part__tutorial__sha_public__isnull=False).order_by('?').first()
+            fake_content = Chapter.objects.filter(pk=pk).first()
         else:
             fake_content = None
 
@@ -92,15 +92,15 @@ class LogFactory():
         else:
             fake_url = fake_content.get_absolute_url_online()
 
-        self.request = "{} {} {}".format(fake.random_element(elements=('GET', 'POST')), fake_url , fake.random_element(elements=('HTTP/1.0', 'HTTP/1.1')))
-        self.status = fake.random_element(elements=('404', '200', '403'))
+        self.request = "{} {} {}".format('GET', fake_url , 'HTTP/1.0')
+        self.status = '200'
         self.body_bytes_sent = fake.pyint()
-        self.http_referer = fake.random_element(elements=('/', fake.uri()))
+        self.http_referer = '/'
         self.http_user_agent = fake.user_agent()
         self.http_x_forwarded_for = "-"
-        self.request_time = fake.pydecimal(left_digits=None, right_digits=None, positive=True)
-        self.upstream_response_time = fake.pydecimal(left_digits=None, right_digits=None, positive=True)
-        self.pipe = fake.random_element(elements=('.', 'P'))
+        self.request_time = fake.pyint()
+        self.upstream_response_time = fake.pyint()
+        self.pipe = 'P'
 
     def __str__(self):
         return u"{0} - {1} [{2}] \"{3}\" {4} {5} \"{6}\" \"{7}\" \"{8}\" {9} {10} {11}". format(self.remote_addr,

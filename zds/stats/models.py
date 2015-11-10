@@ -19,7 +19,6 @@ class Dimension:
 
     def get_total_visits(self):
         args = {self.code_name: self.code_value}
-        print args
         return Log.objects.filter(**args).count()
 
     def get_unique_visits(self):
@@ -196,3 +195,6 @@ class Log(models.Model):
     request_time = models.IntegerField('Temps de chargement de la page')
     country = models.CharField('Pays', max_length=80, null=True)
     city = models.CharField('Ville', max_length=80, null=True)
+
+    def __unicode__(self):
+        return "{}-{}|{}".format(self.id_zds, self.content_type, self.hash_code)
